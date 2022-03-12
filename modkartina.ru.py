@@ -87,6 +87,10 @@ async def get_products(category: Category) -> list[Product]:
                 continue
 
             product = await get_product(product_url, category)
+            image_src = product_tag.find('img').get('src')
+            product = Product(product.name, product.category,
+                              image_src, product.code,
+                              product.options)
             products.append(product)
         except Exception:
             traceback.print_exc()
@@ -106,8 +110,9 @@ def save_to_xlsx(products: list[Product], file_name):
         sheet.cell(index, 3).value = '/'.join([product.category.name,
                                                product.category.parent_name])
         sheet.cell(index, 4).value = product.image_src
-        sheet.cell(index, 5).value = '\n'.join([' - '.join([str(option.size),
-                                                            str(option.price)])
+        sheet.cell(index, 5).value = '\n'.join([option.size
+                                                for option in product.options])
+        sheet.cell(index, 6).value = '\n'.join([str(option.price)
                                                 for option in product.options])
 
     book.save(os.path.join(cur_dir, 'Результаты.xlsx'))
